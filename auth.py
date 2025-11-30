@@ -19,7 +19,7 @@ def verify_password(plain_text_password, hashed_password):
     # bcrypt.checkpw handles extracting the salt and comparing
     return bcrypt.checkpw(password_bytes, hashed_password_bytes)
 
-def register_user(username, password): 
+def register_user(username, password, role='user'): 
     #Register a new user.
     if user_exists(username):
         print(f"Error: Username '{username}' already exists.")
@@ -27,8 +27,8 @@ def register_user(username, password):
     
     hashed_password = hash_password(password) 
     with open("users.txt", "a") as f: 
-       f.write(f"{username},{hashed_password}\n") 
-       print(f"User '{username}' registered.")
+       f.write(f"{username},{hashed_password},{role}\n") 
+       print(f"User '{username}' registered successfully.")
     return True
 
 def user_exists(username):
@@ -46,8 +46,9 @@ def login_user(username, password):
        #Log in an existing user.
     with open("users.txt", "r") as f:
         for line in f.readlines(): 
-            user, hash = line.strip().split(",", 1)
-            if user == username:
+            user, rest = line.strip().split(",", 1)
+            hash = rest.split(",")[0]  # Get just the password hash part
+            if (user == username):
                 if verify_password(password, hash):
                     print(f"Success: Welcome, {username}!")
                     return True
