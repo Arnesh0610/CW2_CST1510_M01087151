@@ -1,0 +1,5 @@
+Arness,$2b$12$4v5vqHqR/gC44XVChiUuQOUbO5V9ob0hGNaFEGGq5jvJRVIAXrZ1a
+Tej,$2b$12$wXzCFtaNFSeHkLb6uTVGaulGXNHxm8wwie0Q5HQT.L8B0zTdLOUM6
+alice,$2b$12$WTHQdqXx6K.U6ej7OwsXw.qMdg90TAZ.V57yBdT5cM92ss0MlSu7m
+Karel,$2b$12$eArlC0bBKCH0vPkAgha7UesTEJAwlACUF5Jhr1KwXr73w9hReHNtK, user
+Adi,$2b$12$0dp9G5KFolvhbtzmtNbcaeBHhEprBWojsmmgSeVN5sxvO9CGBdB9m, user
