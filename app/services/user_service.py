@@ -1,38 +1,12 @@
 import bcrypt
 from pathlib import Path
-from app.data.db import connect_database
-from app.data.users import get_user_by_username, insert_user
+# from app.data.db import connect_database
+# from app.data.users import get_user_by_username, insert_user
 import sqlite3
+from data.db import connect_database
 
-def register_user(username, password, role='user'):
-    """Register new user with password hashing."""
-    # Hash password
-    password_hash = bcrypt.hashpw(
-        password.encode('utf-8'),
-        bcrypt.gensalt()
-    ).decode('utf-8')
-    
-    # Insert into database
-    insert_user(username, password_hash, role)
-    return True, f"User '{username}' registered successfully."
+DATA_DIR = Path("DATAS")
 
-def login_user(username, password):
-    """Authenticate user."""
-    user = get_user_by_username(username)
-    if not user:
-        return False, "User not found."
-    
-    # Verify password
-    stored_hash = user[2]  # password_hash column
-    if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
-        return True, f"Login successful!"
-    return False, "Incorrect password."
-
-def migrate_users_from_file(filepath='DATA/users.txt'):
-    """Migrate users from text file to database."""
-    # ... migration logic ...
-
-DATA_DIR = Path("DATA")
 def migrate_users_from_file(conn, filepath=DATA_DIR / "users.txt"):
     """
     Migrate users from users.txt to the database.

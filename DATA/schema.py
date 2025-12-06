@@ -28,16 +28,13 @@ def create_cyber_incidents_table(conn):
     # TODO: Write CREATE TABLE IF NOT EXISTS SQL statement
     # Follow the pattern from create_users_table()
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            incident_type TEXT NOT NULL,
+        CREATE TABLE IF NOT EXISTS cyber_incidents (
+            incident_id INTEGER PRIMARY KEY,
+            timestamp TEXT NOT NULL,
             severity TEXT NOT NULL,
+            category TEXT NOT NULL,
             status TEXT NOT NULL,
-            description TEXT,
-            reported_by TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (reported_by) REFERENCES users(username)
+            description TEXT
         )
     """)
 
@@ -52,16 +49,16 @@ def create_datasets_metadata_table(conn):
 
     cursor=conn.cursor()
 
+    cursor.execute("DROP TABLE IF EXISTS datasets_metadata")
+
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS datasets_metadata (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        dataset_name TEXT NOT NULL UNIQUE,
-        category TEXT NOT NULL,
-        source TEXT NOT NULL,
-        last_updated TEXT NOT NULL,
-        record_count INTEGER,
-        file_size_mb REAL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE datasets_metadata (
+        dataset_id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        rows INTEGER NOT NULL,
+        columns INTEGER NOT NULL,
+        uploaded_by TEXT NOT NULL,
+        upload_date TEXT NOT NULL
     )
     """)
 
@@ -72,21 +69,19 @@ def create_datasets_metadata_table(conn):
 def create_it_tickets_table(conn):
     cursor=conn.cursor()
 
+    cursor.execute("DROP TABLE IF EXISTS it_tickets")
+
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS it_tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticket_id TEXT UNIQUE NOT NULL,
+        CREATE TABLE it_tickets (
+            ticket_id TEXT PRIMARY KEY,
             priority TEXT NOT NULL,
-            status TEXT NOT NULL,
-            category TEXT NOT NULL,
-            subject TEXT NOT NULL,
             description TEXT,
-            created_date TEXT NOT NULL,
-            resolved_date TEXT,
+            status TEXT NOT NULL,
             assigned_to TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TEXT NOT NULL,
+            resolution_time_hours INTEGER
         )
         """)
-    
+
     conn.commit()
     print("IT tickets table created successfully!")

@@ -1,31 +1,18 @@
 import pandas as pd
-from app.data.db import connect_database
+from data.db import connect_database
 
-def insert_incident(date, incident_type, severity, status, description, reported_by=None):
-    """Insert new incident."""
-    conn = connect_database()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO cyber_incidents
-        (date, incident_type, severity, status, description, reported_by)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (date, incident_type, severity, status, description, reported_by))
-    conn.commit()
-    incident_id = cursor.lastrowid
-    conn.close()
-    return incident_id
 
 def get_all_incidents():
     """Get all incidents as DataFrame."""
     conn = connect_database()
     df = pd.read_sql_query(
-        "SELECT * FROM cyber_incidents ORDER BY id DESC",
+        "SELECT * FROM cyber_incidents ORDER BY incident_id DESC",
         conn
     )
     conn.close()
     return df
 
-def insert_incident(conn, date, incident_type, severity, status, description, reported_by=None):
+def insert_incident(conn, timestamp, category, severity, status, description):
     """
     Insert a new cyber incident into the database.
 
@@ -33,29 +20,28 @@ def insert_incident(conn, date, incident_type, severity, status, description, re
 
     Args:
         conn: Database connection
-        date: Incident date (YYYY-MM-DD)
-        incident_type: Type of incident
+        timestamp: Incident timestamp
+        category: Type of incident
         severity: Severity level
         status: Current status
         description: Incident description
-        reported_by: Username of reporter (optional)
 
     Returns:
         int: ID of the inserted incident
     """
     # Get cursor
     cursor = conn.cursor()
-    
+
     # Write INSERT SQL with parameterized query
     sql = """
-        INSERT INTO incidents (date, incident_type, severity, status, description, reported_by)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO cyber_incidents (timestamp, category, severity, status, description)
+        VALUES (?, ?, ?, ?, ?)
     """
-    
+
     # Execute and commit
-    cursor.execute(sql, (date, incident_type, severity, status, description, reported_by))
+    cursor.execute(sql, (timestamp, category, severity, status, description))
     conn.commit()
-    
+
     # Return cursor.lastrowid
     return cursor.lastrowid
 
@@ -83,14 +69,14 @@ def update_incident_status(conn, incident_id, new_status):
     Returns:
         int: Number of rows affected (should be 1 if successful)
     """
-    # Write UPDATE SQL: UPDATE cyber_incidents SET status = ? WHERE id = ?
+    # Write UPDATE SQL: UPDATE cyber_incidents SET status = ? WHERE incident_id = ?
     cursor = conn.cursor()
-    sql = "UPDATE cyber_incidents SET status = ? WHERE id = ?"
-    
+    sql = "UPDATE cyber_incidents SET status = ? WHERE incident_id = ?"
+
     # Execute and commit
     cursor.execute(sql, (new_status, incident_id))
     conn.commit()
-    
+
     # Return cursor.rowcount
     return cursor.rowcount
 
@@ -105,14 +91,14 @@ def delete_incident(conn, incident_id):
     Returns:
         int: Number of rows affected (should be 1 if successful)
     """
-    # Write DELETE SQL: DELETE FROM cyber_incidents WHERE id = ?
+    # Write DELETE SQL: DELETE FROM cyber_incidents WHERE incident_id = ?
     cursor = conn.cursor()
-    sql = "DELETE FROM cyber_incidents WHERE id = ?"
-    
+    sql = "DELETE FROM cyber_incidents WHERE incident_id = ?"
+
     # Execute and commit
     cursor.execute(sql, (incident_id,))
     conn.commit()
-    
+
     # Return cursor.rowcount
     return cursor.rowcount
 
@@ -123,9 +109,9 @@ def get_incidents_by_type_count(conn):
     Uses: SELECT, FROM, GROUP BY, ORDER BY
     """
     query = """
-    SELECT incident_type, COUNT(*) as count
+    SELECT category, COUNT(*) as count
     FROM cyber_incidents
-    GROUP BY incident_type
+    GROUP BY category
     ORDER BY count DESC
     """
     df = pd.read_sql_query(query, conn)
@@ -152,9 +138,9 @@ def get_incident_types_with_many_cases(conn, min_count=5):
     Uses: SELECT, FROM, GROUP BY, HAVING, ORDER BY
     """
     query = """
-    SELECT incident_type, COUNT(*) as count
+    SELECT category, COUNT(*) as count
     FROM cyber_incidents
-    GROUP BY incident_type
+    GROUP BY category
     HAVING COUNT(*) > ?
     ORDER BY count DESC
     """

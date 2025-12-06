@@ -2,14 +2,22 @@ import sqlite3
 from pathlib import Path
 import os
 import pandas as pd
-from app.data.schema import create_all_tables, load_all_csv_data
-from app.services.user_service import migrate_users_from_file
+from data.schema import create_all_tables
 
-DB_PATH = Path("DATA") / "intelligence_platform.db"
+
+DATA_DIR = Path("DATAS")
+DB_PATH = DATA_DIR / "intelligence_platform.db"
 
 def connect_database(db_path=DB_PATH):
     """Connect to SQLite database."""
-     
+    # Ensure the DATA directory exists
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Create connection
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row  # Optional: returns rows as dictionaries
+    
+    print(f"📂 Connected to database: {db_path}")
 
     return sqlite3.connect(str(db_path))
 
@@ -29,35 +37,31 @@ def load_csv_to_table(conn, csv_path, table_name, date_columns=None):
     """
     # TODO: Check if CSV file exists
 
-    # TODO: Read CSV using pandas.read_csv()
-
-    # TODO: Use df.to_sql() to insert data
-    # Parameters: name=table_name, con=conn, if_exists='append', index=False
-
-    # TODO: Print success message and return row count
-
     if not os.path.exists(csv_path):
         print(f" CSV file not found: {csv_path}")
         return 0
-
+    
+    # TODO: Read CSV using pandas.read_csv()
     try:
         read_params = {}
         if date_columns:
             read_params['parse_dates'] = date_columns
             
         df = pd.read_csv(csv_path, **read_params)
-        
+        # TODO: Use df.to_sql() to insert data
         print(f"   Loading {len(df)} rows from {csv_path} into {table_name} table...")
         print(f"   Columns: {list(df.columns)}")
         
         # Load data into database
+        # Parameters: name=table_name, con=conn, if_exists='replace', index=False
         rows_loaded = df.to_sql(
-            name=table_name, 
-            con=conn, 
-            if_exists='append', 
+            name=table_name,
+            con=conn,
+            if_exists='replace',
             index=False
         )
-        
+
+        # TODO: Print success message and return row count
         print(f"✅ Successfully loaded {rows_loaded} rows into {table_name} table!")
         return rows_loaded
         
@@ -65,6 +69,58 @@ def load_csv_to_table(conn, csv_path, table_name, date_columns=None):
         print(f"   Error loading CSV into {table_name}: {e}")
         return 0
     
+def load_all_csv_data(conn):
+    """
+    Load all CSV data into appropriate database tables.
+    
+    Args:
+        conn: Database connection
+    
+    Returns:
+        int: Total number of rows loaded
+    """
+    
+    # Define CSV files and their corresponding tables
+    csv_files = [
+        {
+            "path": DATA_DIR / "cyber_incidents.csv",
+            "table": "cyber_incidents",
+            "date_columns": ["timestamp"]  # Specify date columns to parse
+        },
+        {
+            "path": DATA_DIR / "datasets_metadata.csv",
+            "table": "datasets_metadata",
+            "date_columns": None
+        },
+        {
+            "path": DATA_DIR / "it_tickets.csv",
+            "table": "it_tickets",
+            "date_columns": ["created_at"]
+        },
+        # Add more CSV files as needed
+    ]
+    
+    total_rows_loaded = 0
+    
+    for csv_info in csv_files:
+        csv_path = csv_info["path"]
+        table_name = csv_info["table"]
+        date_columns = csv_info.get("date_columns")
+        
+        if csv_path.exists():
+            rows_loaded = load_csv_to_table(
+                conn, 
+                csv_path, 
+                table_name, 
+                date_columns
+            )
+            total_rows_loaded += rows_loaded
+        else:
+            print(f"⚠️  CSV file not found: {csv_path.name}")
+            print(f"   Skipping {table_name} table...")
+    
+    print(f"\n✅ Total rows loaded from all CSV files: {total_rows_loaded}")
+    return total_rows_loaded
 
 def setup_database_complete():
     """
@@ -90,6 +146,7 @@ def setup_database_complete():
 
     # Step 3: Migrate users
     print("\n[3/5] Migrating users from users.txt...")
+    from app.services.user_service import migrate_users_from_file
     user_count = migrate_users_from_file(conn)
     print(f"       Migrated {user_count} users")
 
