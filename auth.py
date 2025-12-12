@@ -1,22 +1,23 @@
 import bcrypt
 import os
 
+#Define the user data file path
 USER_DATA_FILE = "users.txt"
 
 def hash_password(plain_text_password):
-    # Encode the password to bytes, required by bcrypt
+    #Encode the password to bytes, required by bcrypt
     password_bytes = plain_text_password.encode('utf-8')
-    # Generate a salt and hash the password
+    #Generate a salt and hash the password
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password_bytes, salt)
-    # Decode the hash back to a string to store in a text file
+    #Decode the hash back to a string to store in a text file
     return hashed_password.decode('utf-8')  # Decode to string for storage
 
 def verify_password(plain_text_password, hashed_password):
-    # Encode both the plaintext password and stored hash to bytes
+    #Encode both the plaintext password and stored hash to bytes
     password_bytes = plain_text_password.encode('utf-8')
     hashed_password_bytes = hashed_password.encode('utf-8')
-    # bcrypt.checkpw handles extracting the salt and comparing
+    #bcrypt.checkpw handles extracting the salt and comparing
     return bcrypt.checkpw(password_bytes, hashed_password_bytes)
 
 def register_user(username, password, role='user'): 
@@ -25,7 +26,10 @@ def register_user(username, password, role='user'):
         print(f"Error: Username '{username}' already exists.")
         return False
     
+    #Password is hashed before storage
     hashed_password = hash_password(password) 
+
+    #Store user data in the users.txt file
     with open("users.txt", "a") as f: 
        f.write(f"{username},{hashed_password},{role}\n") 
        print(f"User '{username}' registered successfully.")
@@ -47,7 +51,8 @@ def login_user(username, password):
     with open("users.txt", "r") as f:
         for line in f.readlines(): 
             user, rest = line.strip().split(",", 1)
-            hash = rest.split(",")[0]  # Get just the password hash part
+            # Get just the password hash part
+            hash = rest.split(",")[0]  
             if (user == username):
                 if verify_password(password, hash):
                     print(f"Success: Welcome, {username}!")
@@ -68,7 +73,7 @@ def validate_username(username):
 
 
 def validate_password(password):
-    
+    #Check password length
     if len(password) < 6:
         return False, "Password must be at least 6 characters long."
     if len(password) > 50:
@@ -82,21 +87,27 @@ def check_password_strength(password):
     char_present = False
     digit_present = False
     specialchar_present = False
-
-    if len(password) >= 8:   #Checking if password has less than 8 letters
+    #Checking if password has more than 8 letters
+    if len(password) >= 8:   
         strength=strength+1
 
-       
-    for char in password:      #Checking each character in password
-        if char.isupper():    #Checking if there is any uppercase letter in password
-            upper_present=True #Boolean value changes if condition met
-        elif char.islower():  #Checking if there is any lowercase letter in passwordpyt
-            char_present=True  #Boolean value changes if condition met
-        elif char.isdigit():  #Checking if there is any number in password
-            digit_present=True #Boolean value changes if condition met
-        elif special_character(char): #Calling a function to check for special character
-            specialchar_present=True #Boolean value changes if condition met
+    #Checking each character in password
+    for char in password:
+        #Checking if there is any uppercase letter in password      
+        if char.isupper():    
+            #Boolean value changes if condition met
+            upper_present=True 
+         #Checking if there is any lowercase letter in password
+        elif char.islower():  
+            char_present=True  
+         #Checking if there is any number in password
+        elif char.isdigit():  
+            digit_present=True 
+         #Calling a function to check for special character
+        elif special_character(char): 
+            specialchar_present=True 
     
+    #Calculating strength level
     if upper_present:
         strength += 1
     if char_present:
@@ -106,6 +117,7 @@ def check_password_strength(password):
     if specialchar_present:
         strength += 1
 
+    #Display strength level
     if strength <= 3:
         print("Password is weak")
     elif strength == 4:
@@ -115,11 +127,15 @@ def check_password_strength(password):
 
 def special_character(char):
    code = ord(char)   #code is the ASCII value(In denary) of char
-   if (65 <= code <= 90) or (97 <= code <= 122) or (48 <= code <= 57): #Comparing code with ASCII values
-        return False   #Returning false since char is not a special character
+   #Comparing code with ASCII values
+   if (65 <= code <= 90) or (97 <= code <= 122) or (48 <= code <= 57): 
+       #Returning false since char is not a special character 
+       return False   
    else:
-      return True     #Returning true since char is a special character
-   
+      #Returning true since char is a special character
+      return True     
+
+#Display menu function
 def display_menu():
  """Displays the main menu options."""
  print("\n" + "="*50)
@@ -131,12 +147,13 @@ def display_menu():
  print("[3] Exit")                                  
  print("-"*50)
 
+#Main program loop function
 def main():
     """Main program loop."""
     print("\nWelcome to the Week 7 Authentication System!")
     
     while True:
-        
+        #Calling display_menu function
         display_menu()
         choice = input("\nPlease select an option (1-3): ").strip()
                                                      
@@ -161,7 +178,7 @@ def main():
                 print("Re-enter")
                 continue
             
-            # Confirm password
+            #Confirming password
             password_confirm = input("Confirm password: ").strip()
             if password != password_confirm:
                 print("Error: Passwords do not match.")
@@ -169,32 +186,30 @@ def main():
             else:
                 check_password_strength(password)
            
-            # Register the user
+            #Register the user
             register_user(username, password)
-
         elif choice == '2':
-            # Login flow
+            #Login flow
             print("\n--- USER LOGIN ---")
             username = input("Enter your username: ").strip()
             password = input("Enter your password: ").strip()
            
-        # Attempt login
+            #Attempt login
             if login_user(username, password):
                 print("\nYou are now logged in.")
                 print("(In a real application, you would now access the dashboard or main features.)")
                                                   
                 # Optional: Ask if they want to logout or exit
                 input("\nPress Enter to return to main menu...")
-
         elif choice == '3':
             # Exit
             print("\nThank you for using the authentication system.")
             print("Exiting...")
             break
-
         else:
             print("\nError: Invalid option. Please select 1, 2, or 3.")
 
+#Run the main program loop
 if __name__ == "__main__":
     main()
 
