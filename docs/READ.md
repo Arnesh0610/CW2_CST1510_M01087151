@@ -16,3 +16,7 @@ This system allows users to register accounts and log in with proper pass
 - Data Storage: Plain text file (`users.txt`) with comma-separated values
 - Password Security: One-way hashing, no plaintext storage
 - Validation: Username (3-20 alphanumeric characters), Password (6-50 characters)
+
+# Week 8: Database Migration & CRUD functionality
+## Project Description
+

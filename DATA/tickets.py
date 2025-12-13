@@ -3,18 +3,17 @@ import pandas as pd
 from data.db import connect_database
 
 #Function to get all tickets
-def get_all_tickets():
+def get_all_tickets(conn):
     #Get all tickets as DataFrame.
-    conn = connect_database()
     df = pd.read_sql_query(
-        "SELECT * FROM it_tickets ORDER BY ticket_id",
+        "SELECT * FROM it_tickets ORDER BY ticket_id DESC",
         conn
     )
-    conn.close()
     return df
 
 #Function to insert a new ticket
 def insert_ticket(conn, priority, description, status, assigned_to, created_at, resolution_time_hours):
+
     # Get cursor
     cursor = conn.cursor()
 
@@ -29,14 +28,7 @@ def insert_ticket(conn, priority, description, status, assigned_to, created_at, 
     conn.commit()
 
     # Return cursor.lastrowid
-    return cursor.lastrowid
-
-#Function to retrieve all tickets
-def get_all_tickets(conn):
-    import pandas as pd
-    # Use pd.read_sql_query("SELECT * FROM it_tickets", conn)
-
-    return pd.read_sql_query("SELECT * FROM it_tickets", conn)
+    return  cursor.lastrowid
 
 #Function to update ticket status
 def update_ticket_status(conn, ticket_id, new_status):

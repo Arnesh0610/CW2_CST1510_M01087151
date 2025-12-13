@@ -28,8 +28,8 @@ def create_cyber_incidents_table(conn):
             category TEXT NOT NULL,
             status TEXT NOT NULL,
             description TEXT
-        )
-    """)
+            )
+        """)
 
     #Commit the changes
     conn.commit()
@@ -37,15 +37,32 @@ def create_cyber_incidents_table(conn):
     #Print success message
     print("Cyber incidents table created successfully!")
 
+import sqlite3
+
+def insert_incident(conn, timestamp, severity, category, status, description):
+    cursor = conn.cursor()
+    
+    # Method 1: Let SQLite auto-generate the ID
+    cursor.execute("""
+        INSERT INTO cyber_incidents (timestamp, severity, category, status, description)
+        VALUES (?, ?, ?, ?, ?)
+        """, (timestamp, severity, category, status, description))
+    
+    
+    conn.commit()
+    incident_id = cursor.lastrowid
+    print(f"Incident inserted with ID: {incident_id}")
+    return incident_id
+
+
+
 #Create datasets metadata table
 def create_datasets_metadata_table(conn):
 
     cursor=conn.cursor()
 
-    cursor.execute("DROP TABLE IF EXISTS datasets_metadata")
-
     cursor.execute("""
-    CREATE TABLE datasets_metadata (
+    CREATE TABLE IF NOT EXISTS datasets_metadata (
         dataset_id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         rows INTEGER NOT NULL,
@@ -62,10 +79,8 @@ def create_datasets_metadata_table(conn):
 def create_it_tickets_table(conn):
     cursor=conn.cursor()
 
-    cursor.execute("DROP TABLE IF EXISTS it_tickets")
-
     cursor.execute("""
-        CREATE TABLE it_tickets (
+        CREATE TABLE IF NOT EXISTS it_tickets (
             ticket_id INTEGER PRIMARY KEY AUTOINCREMENT,
             priority TEXT NOT NULL,
             description TEXT,

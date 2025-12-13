@@ -5,28 +5,28 @@ from data.schema import create_all_tables
 from data.db import load_all_csv_data
 
 #Function to get all incidents
-def get_all_incidents(conn):
+def get_all_incidents():
+    conn = connect_database()
+    #Get all incidents as DataFrame.
     df = pd.read_sql_query(
-        "SELECT * FROM cyber_incidents ORDER BY incident_id",
+        "SELECT * FROM cyber_incidents ORDER BY incident_id DESC",
         conn
     )
+    conn.close()
     return df
 
+#Insert new incident.
 def insert_incident(conn, timestamp, severity, category, status, description):
-    #Get cursor
+    
     cursor = conn.cursor()
-
-    #Write INSERT SQL with parameterized query
-    sql = """
-        INSERT INTO cyber_incidents(timestamp, severity, category, status, description)
-        VALUES (?, ?, ?, ?, ?)
-    """
-
-    #Execute and commit
-    cursor.execute(sql, (timestamp, severity, category, status, description))
+    cursor.execute("""
+        INSERT INTO cyber_incidents
+        ( timestamp, severity, category, status, description)
+        VALUES ( ?, ?, ?, ?, ?)
+    """, (timestamp, severity, category, status, description))
     conn.commit()
 
-    #Return cursor.lastrowid
+    
     return cursor.lastrowid
 
 def update_incident_status(conn, incident_id, new_status):
@@ -64,6 +64,7 @@ def get_incidents_by_type_count(conn):
     """
     df = pd.read_sql_query(query, conn)
     return df
+
 
 def get_high_severity_by_status(conn):
     query = """

@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from data.schema import create_all_tables
 
-
 DATA_DIR = Path("DATAS")
 DB_PATH = DATA_DIR / "intelligence_platform.db"
 
@@ -12,14 +11,14 @@ def connect_database(db_path=DB_PATH):
     #Connect to SQLite database.
     # Ensure the DATA directory exists
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Create connection
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row  # Optional: returns rows as dictionaries
-    
+
     print(f"📂 Connected to database: {db_path}")
 
-    return sqlite3.connect(str(db_path))
+    return conn
 
 def load_csv_to_table(conn, csv_path, table_name, date_columns=None):
     #Check if CSV file exists
@@ -47,11 +46,11 @@ def load_csv_to_table(conn, csv_path, table_name, date_columns=None):
         print(f"   Columns: {list(df.columns)}")
 
         # Load data into database
-        # Parameters: name=table_name, con=conn, if_exists='replace', index=False
+        # Parameters: name=table_name, con=conn, if_exists='append', index=False
         rows_loaded = df.to_sql(
             name=table_name,
             con=conn,
-            if_exists='replace',
+            if_exists='append',
             index=False
         )
 

@@ -91,7 +91,7 @@ def register_user(username, password, role="user"):
 
 #Function to login user
 def login_user(username, password):
-    conn = connect_database()
+    conn = connect_database("DATAS/intelligence_platform.db")
     cursor = conn.cursor()
 
     #Find user
@@ -99,7 +99,7 @@ def login_user(username, password):
     user = cursor.fetchone()
     conn.close()
 
-    if not user:
+    if user is None:
         return False, "Username not found."
 
     #Verify password (user[2] is password_hash column)

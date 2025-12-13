@@ -3,28 +3,24 @@ from data.db import connect_database
 
 def get_all_datasets(conn):
     #Get all datasets as DataFrame.
-    conn = connect_database()
     df = pd.read_sql_query(
         "SELECT * FROM datasets_metadata ORDER BY dataset_id",
         conn
     )
-    conn.close()
     return df
 
 def insert_dataset(conn, name, rows, columns, uploaded_by, upload_date):
+
     #Get cursor
     cursor = conn.cursor()
 
-    #Write INSERT SQL with parameterized query
-    sql = """
+    #Execute and commit
+    cursor.execute("""
         INSERT INTO datasets_metadata (name, rows, columns, uploaded_by, upload_date)
         VALUES (?, ?, ?, ?, ?)
-    """
-
-    #Execute and commit
-    cursor.execute(sql, (name, rows, columns, uploaded_by, upload_date))
+    """, (name, rows, columns, uploaded_by, upload_date))
     conn.commit()
-
+    
     # Return cursor.lastrowid
     return cursor.lastrowid
 
