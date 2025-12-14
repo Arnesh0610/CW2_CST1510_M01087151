@@ -6,7 +6,7 @@ from data.db import connect_database
 def get_all_tickets(conn):
     #Get all tickets as DataFrame.
     df = pd.read_sql_query(
-        "SELECT * FROM it_tickets ORDER BY ticket_id DESC",
+        "SELECT * FROM it_tickets ORDER BY ticket_id",
         conn
     )
     return df

@@ -9,7 +9,7 @@ def get_all_incidents():
     conn = connect_database()
     #Get all incidents as DataFrame.
     df = pd.read_sql_query(
-        "SELECT * FROM cyber_incidents ORDER BY incident_id DESC",
+        "SELECT * FROM cyber_incidents ORDER BY incident_id",
         conn
     )
     conn.close()
