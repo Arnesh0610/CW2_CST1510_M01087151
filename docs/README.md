@@ -1,3 +1,7 @@
+
+Video link:https://drive.google.com/drive/folders/1mlv-g48NOVlGgtSJdRa832N5LbLY9h7F?usp=drive_link
+GitHub link:https://github.com/Arnesh0610/CW2_CST1510_M01087151/tree/main
+
 # Week 7: Secure Authentication System
 Student Name: Arneshrai Tarushsingh Lochun
 Student ID: M01087151
